@@ -37,22 +37,22 @@ dsh --profile headless "把 tests 跑一遍"
 
 **R1 · 命令入口统一**——`dsh` 一个命令，按模式分发：`--profile <name>` 启动、`--profile headless "任务"` 一次性任务、`dsh web` 别名、`dsh plugin` 管理插件、`--dump-config` 打印配置树。
 
-- 实例：官方原文 *"The `dsh` command is the product launcher for profiles: ordered stacks of plugin-bundle patch layers under the user's own overrides"*（[apps/cli/README.md 第 5 行](../../deepseek-harness/apps/cli/README.md)）。
+- 实例：官方原文 *"The `dsh` command is the product launcher for profiles: ordered stacks of plugin-bundle patch layers under the user's own overrides"*（[apps/cli/README.md 第 5 行](../deepseek-harness/apps/cli/README.md)）。
 - 为什么必须：产品形态多，入口必须少；一个命令 + 参数 = 学习成本最低。
 
 **R2 · 启动组合可复现**——启动 = 把 profile 的 bundle 层叠按序合并成配置树并加载；`--dump-config` 离线输出**与真实启动完全一致**的组合结果。
 
-- 实例：`renderConfigDump` 用 include 自己的解析器与 patch 算法离线组合（[app-boot/README.md 第 22 行](../../deepseek-harness/packages/boot/app-boot/README.md)）——"组合、标志派生、配置 dump 永不与启动漂移"。
+- 实例：`renderConfigDump` 用 include 自己的解析器与 patch 算法离线组合（[app-boot/README.md 第 22 行](../deepseek-harness/packages/boot/app-boot/README.md)）——"组合、标志派生、配置 dump 永不与启动漂移"。
 - 为什么必须：配置审计（第 01 篇 N1）要求"打印的"等于"启动的"。
 
 **R3 · 启动失败大声且干净**——Loader 失败/插件未解析/插件激活失败 → 带标签的一行错误 + `exit(1)`；部分启动的上下文要**先清理再退出**（终端恢复）。
 
-- 实例：`installFailLoud` + `assertEntriesLoaded`/`assertEntriesActivated`（[app-boot/README.md 第 12~15 行](../../deepseek-harness/packages/boot/app-boot/README.md)）。
+- 实例：`installFailLoud` + `assertEntriesLoaded`/`assertEntriesActivated`（[app-boot/README.md 第 12~15 行](../deepseek-harness/packages/boot/app-boot/README.md)）。
 - 为什么必须：半启动的产品比不启动更危险（终端残留 raw mode 等）；静默失败无法诊断。
 
 **R4 · profile 即目录**——profile 是 `$DSH_HOME/profiles/<name>` 下的一个目录：package.json（`dsh.profile` 声明 bundles 顺序）+ 用户 `cordis.patch.yml`；`web`/`headless` 首次使用自动初始化。
 
-- 实例：`PROFILE_TEMPLATES`（web、headless）首次使用自动初始化，其他名字必须 `dsh plugin` 创建（[app-boot/README.md 第 38 行](../../deepseek-harness/packages/boot/app-boot/README.md)）。
+- 实例：`PROFILE_TEMPLATES`（web、headless）首次使用自动初始化，其他名字必须 `dsh plugin` 创建（[app-boot/README.md 第 38 行](../deepseek-harness/packages/boot/app-boot/README.md)）。
 - 为什么必须：用户配置与产品安装分离——升级产品不碰用户配置。
 
 ### 0.3 非功能需求
@@ -145,16 +145,16 @@ flowchart LR
 
 | 顺序 | 文件（点击直达） | 关注点 | 对应需求 |
 |---|---|---|---|
-| 1 | [apps/cli/src/bin.ts](../../deepseek-harness/apps/cli/src/bin.ts) | 入口分发：动态 import 按模式（第 27~50 行） | R1 / N1 |
-| 2 | [apps/cli/src/args.ts](../../deepseek-harness/apps/cli/src/args.ts) | 参数语法（--profile/--patch/--dump-config） | R1 |
-| 3 | [apps/cli/src/profile-boot.ts](../../deepseek-harness/apps/cli/src/profile-boot.ts) | 主启动路径 | R2/R3 |
-| 4 | [apps/cli/src/dump-config.ts](../../deepseek-harness/apps/cli/src/dump-config.ts) | 配置审计路径 | R2 |
-| 5 | [packages/boot/app-boot/src/index.ts](../../deepseek-harness/packages/boot/app-boot/src/index.ts) | `boot()`、`mountRootInclude`、`renderConfigDump` | R2/R3 |
-| 6 | [apps/cli/config/agent-presets](../../deepseek-harness/apps/cli/config/agent-presets) | 内置 agent 预设（code/cordis/minimal/standard） | R4 |
+| 1 | [apps/cli/src/bin.ts](../deepseek-harness/apps/cli/src/bin.ts) | 入口分发：动态 import 按模式（第 27~50 行） | R1 / N1 |
+| 2 | [apps/cli/src/args.ts](../deepseek-harness/apps/cli/src/args.ts) | 参数语法（--profile/--patch/--dump-config） | R1 |
+| 3 | [apps/cli/src/profile-boot.ts](../deepseek-harness/apps/cli/src/profile-boot.ts) | 主启动路径 | R2/R3 |
+| 4 | [apps/cli/src/dump-config.ts](../deepseek-harness/apps/cli/src/dump-config.ts) | 配置审计路径 | R2 |
+| 5 | [packages/boot/app-boot/src/index.ts](../deepseek-harness/packages/boot/app-boot/src/index.ts) | `boot()`、`mountRootInclude`、`renderConfigDump` | R2/R3 |
+| 6 | [apps/cli/config/agent-presets](../deepseek-harness/apps/cli/config/agent-presets) | 内置 agent 预设（code/cordis/minimal/standard） | R4 |
 
 ### 2.2 关键实现片段
 
-**片段 A：一个命令，四种模式**（[bin.ts 第 29~49 行](../../deepseek-harness/apps/cli/src/bin.ts)）
+**片段 A：一个命令，四种模式**（[bin.ts 第 29~49 行](../deepseek-harness/apps/cli/src/bin.ts)）
 
 ```ts
 switch (invocation.mode) {
@@ -173,13 +173,13 @@ switch (invocation.mode) {
 
 翻译：`bin.ts` 是**薄分发壳**——先 `parseDshArgs` 解析参数，再按模式**动态 import** 对应实现。注释说明了设计：*"Dynamic imports per mode keep unrelated modes out of each dispatch path"*（第 3 行）——启动 web 不加载 plugin/dump 的代码（N1 模式隔离）。
 
-**片段 B：dump 与启动共用同一算法**（[app-boot/README.md 第 22 行](../../deepseek-harness/packages/boot/app-boot/README.md)）
+**片段 B：dump 与启动共用同一算法**（[app-boot/README.md 第 22 行](../deepseek-harness/packages/boot/app-boot/README.md)）
 
 > `renderConfigDump` … Compose the base config and labeled overlay layers offline with the include's own parser and patch algorithm (`entryListSchema`/`applyEntryPatches`), so the result equals what `boot()` mounts …
 
 翻译：`renderConfigDump` 不用自己写的合并逻辑，而是**复用 include 的解析器与补丁算法**（vendor/include 导出的 `entryListSchema`/`applyEntryPatches`）——"打印的"与"启动的"出自同一段代码（R2/N4）。第 01 篇动手任务里看到的 `# == ...` 分层注释就是 `renderConfigDump` 为每层打的标签。
 
-**片段 C：失败大声的守卫**（[app-boot/README.md 第 12~15 行](../../deepseek-harness/packages/boot/app-boot/README.md)）
+**片段 C：失败大声的守卫**（[app-boot/README.md 第 12~15 行](../deepseek-harness/packages/boot/app-boot/README.md)）
 
 > `installFailLoud` — Turn an unhandled boot or later Loader rejection into one labelled stderr line + `exit(1)` … `assertEntriesLoaded` — Throw when a settled tree holds an enabled entry with no fiber, reporting every unresolved plugin name …
 
@@ -187,7 +187,7 @@ switch (invocation.mode) {
 
 ### 2.3 符号 hover 指引
 
-在 VS Code 打开 [packages/boot/app-boot/src/index.ts](../../deepseek-harness/packages/boot/app-boot/src/index.ts) hover `boot`、`renderConfigDump`、`installFailLoud` 查看完整 JSDoc 契约。
+在 VS Code 打开 [packages/boot/app-boot/src/index.ts](../deepseek-harness/packages/boot/app-boot/src/index.ts) hover `boot`、`renderConfigDump`、`installFailLoud` 查看完整 JSDoc 契约。
 
 ## 3 产物演示（EXAMPLE）
 
@@ -260,7 +260,7 @@ pnpm dsh --profile headless --dump-config > dump.yml
 
 ### 任务 2：看入口分发
 
-打开 [apps/cli/src/bin.ts](../../deepseek-harness/apps/cli/src/bin.ts)，数一数 switch 里有几个模式分支（profile / plugin / dump-config / 其他）。**判据**：每个 case 都是 `await import(...)` 动态加载。
+打开 [apps/cli/src/bin.ts](../deepseek-harness/apps/cli/src/bin.ts)，数一数 switch 里有几个模式分支（profile / plugin / dump-config / 其他）。**判据**：每个 case 都是 `await import(...)` 动态加载。
 
 ### 任务 3（进阶）：制造一次"失败要大声"
 
@@ -274,7 +274,7 @@ pnpm dsh --profile headless --patch "no-such-file.yml" --dump-config
 
 ### FAQ
 
-- **Q1：`dsh web` 和 `dsh --profile web` 什么区别？** 没有——`web` 是 `--profile web` 的别名（[apps/cli/README.md 第 13 行](../../deepseek-harness/apps/cli/README.md)）。
+- **Q1：`dsh web` 和 `dsh --profile web` 什么区别？** 没有——`web` 是 `--profile web` 的别名（[apps/cli/README.md 第 13 行](../deepseek-harness/apps/cli/README.md)）。
 - **Q2：profile 存在哪里？** `$DSH_HOME/profiles/<name>`（`$DSH_HOME` 未设时是 `~/.dsh`）——用户配置与产品安装分离（R4）。
 - **Q3：`--dump-config` 需要 API key 吗？** 不需要。它打印的是"蓝图"（配置树），不启动模型、不连网络——所以它可以做 CI 审计。
 - **Q4：为什么失败要"先清理再退出"？** 因为部分启动的上下文可能已经接管终端（raw mode 等）；不清理就退出，用户的 shell 会残留异常状态（N3）。
@@ -303,10 +303,10 @@ pnpm dsh --profile headless --patch "no-such-file.yml" --dump-config
 
 **官方（权威来源）**：
 
-- [apps/cli/README.md](../../deepseek-harness/apps/cli/README.md) —— 入口模式与参数契约（47 行）
-- [packages/boot/app-boot/README.md](../../deepseek-harness/packages/boot/app-boot/README.md) —— 启动胶水全导出（60 行，信息密度高）
-- [docs/architecture.md](../../deepseek-harness/docs/architecture.md) —— "Profiles and bundles" 一节（组合语义）
-- [docs/config-catalog.md](../../deepseek-harness/docs/config-catalog.md) —— 生成的配置字段目录
+- [apps/cli/README.md](../deepseek-harness/apps/cli/README.md) —— 入口模式与参数契约（47 行）
+- [packages/boot/app-boot/README.md](../deepseek-harness/packages/boot/app-boot/README.md) —— 启动胶水全导出（60 行，信息密度高）
+- [docs/architecture.md](../deepseek-harness/docs/architecture.md) —— "Profiles and bundles" 一节（组合语义）
+- [docs/config-catalog.md](../deepseek-harness/docs/config-catalog.md) —— 生成的配置字段目录
 
 **外部文献（按难度递增）**：
 

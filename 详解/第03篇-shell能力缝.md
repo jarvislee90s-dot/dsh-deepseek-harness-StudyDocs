@@ -168,7 +168,7 @@ flowchart LR
 
 ### 1.3 关系网
 
-官方生成的缝表（[docs/capability-seams.md 第 448 行](../../deepseek-harness/docs/capability-seams.md)）：
+官方生成的缝表（[docs/capability-seams.md 第 448 行](../deepseek-harness/docs/capability-seams.md)）：
 
 > `ctx.shell` | `seam` | 定义：[`shell`](../packages/shell/shell) | 提供者：[`bash-local`](../packages/shell/bash-local)、[`bash-sandbox`](../packages/shell/bash-sandbox)、[`pwsh-local`](../packages/shell/pwsh-local) | 消费者：[`tool-bash`](../packages/shell/tool-bash)、[`tool-pwsh`](../packages/shell/tool-pwsh)、[`hooks-claude-code`](../packages/hooks/hooks-claude-code)、[`hooks-codex`](../packages/hooks/hooks-codex) | *"The model-facing shell tools and hook bridges consume this seam; sandboxed, remote, or PowerShell executors replace bash-local without touching them."*
 
@@ -182,17 +182,17 @@ flowchart LR
 
 | 顺序 | 文件（点击直达） | 关注点 | 对应需求 |
 |---|---|---|---|
-| 1 | [packages/shell/shell/src/types.ts](../../deepseek-harness/packages/shell/shell/src/types.ts) | `ShellExecRequest`（第 24 行起）与 `ShellExecSpec`：接口定义 | R1 |
-| 2 | [packages/shell/shell/src/index.ts](../../deepseek-harness/packages/shell/shell/src/index.ts) | `ShellExecutor` 服务类与 `resolve()` | N4 |
-| 3 | [packages/shell/bash-local/src](../../deepseek-harness/packages/shell/bash-local/src) | 本地执行器：spawn + 输出有界 + 超时（对照实现） | R3 |
-| 4 | [packages/shell/bash-sandbox/src](../../deepseek-harness/packages/shell/bash-sandbox/src) | 沙箱执行器：消费 `ctx.sandbox` 包裹 argv | R1 |
-| 5 | [packages/shell/tool-bash/src](../../deepseek-harness/packages/shell/tool-bash/src) | `bash` 工具：schema + 消费 `ctx.shell` | R2 |
-| 6 | [packages/shell/shell-env/src](../../deepseek-harness/packages/shell/shell-env/src) | `DSH_*` 托管环境注册表 | N3 |
-| 7 | [docs/capability-seams.md](../../deepseek-harness/docs/capability-seams.md) | 全缝关系图与缝表（生成的权威数据） | R1/R4 |
+| 1 | [packages/shell/shell/src/types.ts](../deepseek-harness/packages/shell/shell/src/types.ts) | `ShellExecRequest`（第 24 行起）与 `ShellExecSpec`：接口定义 | R1 |
+| 2 | [packages/shell/shell/src/index.ts](../deepseek-harness/packages/shell/shell/src/index.ts) | `ShellExecutor` 服务类与 `resolve()` | N4 |
+| 3 | [packages/shell/bash-local/src](../deepseek-harness/packages/shell/bash-local/src) | 本地执行器：spawn + 输出有界 + 超时（对照实现） | R3 |
+| 4 | [packages/shell/bash-sandbox/src](../deepseek-harness/packages/shell/bash-sandbox/src) | 沙箱执行器：消费 `ctx.sandbox` 包裹 argv | R1 |
+| 5 | [packages/shell/tool-bash/src](../deepseek-harness/packages/shell/tool-bash/src) | `bash` 工具：schema + 消费 `ctx.shell` | R2 |
+| 6 | [packages/shell/shell-env/src](../deepseek-harness/packages/shell/shell-env/src) | `DSH_*` 托管环境注册表 | N3 |
+| 7 | [docs/capability-seams.md](../deepseek-harness/docs/capability-seams.md) | 全缝关系图与缝表（生成的权威数据） | R1/R4 |
 
 ### 2.2 关键实现片段
 
-**片段 A：请求与规格的分界**（[shell/src/types.ts 第 17~26 行](../../deepseek-harness/packages/shell/shell/src/types.ts)）
+**片段 A：请求与规格的分界**（[shell/src/types.ts 第 17~26 行](../deepseek-harness/packages/shell/shell/src/types.ts)）
 
 ```ts
 interface ShellExecRequest {
@@ -210,7 +210,7 @@ interface ShellExecRequest {
 
 翻译：这是**模型/插件面**的请求形状——`command` 必填，其余全部可选（由 `resolve()` 从配置补全）。注意 `dshEnv` 与 `env` 是分开的：`env` 是普通环境项（先合并），`dshEnv` 是宿主管辖的 `DSH_*` 事实（**最后合并**，所以任何调用方都不能覆盖托管值，N3）。`stdin` 默认关闭——模型驱动的工具调用不喂 stdin（要用就写 heredoc）。
 
-**片段 B：执行器的契约**（[shell/src/types.ts](../../deepseek-harness/packages/shell/shell/src/types.ts)，hover 查看完整 JSDoc）
+**片段 B：执行器的契约**（[shell/src/types.ts](../deepseek-harness/packages/shell/shell/src/types.ts)，hover 查看完整 JSDoc）
 
 ```ts
 interface ShellExecutor {
@@ -221,7 +221,7 @@ interface ShellExecutor {
 
 翻译：缝的完整接口就两个方法。`resolve` 把可选字段补全成 spec（N4 的落点）；`run` 执行并返回结果（stdout/stderr/exit code）。**消费者只依赖这两个方法**——`bash-local` 和 `bash-sandbox` 的差异全部封装在 `run` 内部（R1 的结构保证）。
 
-**片段 C：模型看到的 bash 工具**（[docs/tool-catalog.md](../../deepseek-harness/docs/tool-catalog.md) 中 `@deepseek-ai/dsh-tool-bash` 条目，生成的真实目录）
+**片段 C：模型看到的 bash 工具**（[docs/tool-catalog.md](../deepseek-harness/docs/tool-catalog.md) 中 `@deepseek-ai/dsh-tool-bash` 条目，生成的真实目录）
 
 > The bash tool is the model-facing consumer of the bash executor seam. A `run_in_background` run registers with the generic `ctx.jobs` runtime and is collected/stopped through the `job_*` tools; the `enableRunInBackground` config (default true) removes the parameter entirely when disabled.
 
@@ -229,19 +229,19 @@ interface ShellExecutor {
 
 ### 2.3 符号 hover 指引
 
-在 VS Code 打开 [packages/shell/shell/src/types.ts](../../deepseek-harness/packages/shell/shell/src/types.ts)，hover `ShellExecRequest` 的每个字段可看官方 JSDoc（`stdin` 字段的注释解释了"为什么模型工具不暴露 stdin"）；打开 [packages/shell/tool-bash/src](../../deepseek-harness/packages/shell/tool-bash/src) 的 schema 文件可看工具定义。
+在 VS Code 打开 [packages/shell/shell/src/types.ts](../deepseek-harness/packages/shell/shell/src/types.ts)，hover `ShellExecRequest` 的每个字段可看官方 JSDoc（`stdin` 字段的注释解释了"为什么模型工具不暴露 stdin"）；打开 [packages/shell/tool-bash/src](../deepseek-harness/packages/shell/tool-bash/src) 的 schema 文件可看工具定义。
 
 ## 3 产物演示（EXAMPLE）
 
 ### 3.1 输入
 
-同一份真实快照（`examples/acp-agent/tests/snapshots/bash-tool-turn/session.jsonl`）中，模型发出的工具调用（[完整文件见此处](../../deepseek-harness/examples/acp-agent/tests/snapshots/bash-tool-turn/session.jsonl)）：
+同一份真实快照（`examples/acp-agent/tests/snapshots/bash-tool-turn/session.jsonl`）中，模型发出的工具调用（[完整文件见此处](../deepseek-harness/examples/acp-agent/tests/snapshots/bash-tool-turn/session.jsonl)）：
 
 ```json
 {"type":"tool/call","seq":65,"data":{"callId":"call_00_fkbBRJsUrGKd1pWVc4Gn8233","name":"bash","arguments":"{\"command\": \"echo TERMINAL_OK\", \"description\": \"Echo TERMINAL_OK to verify terminal access\"}"}}
 ```
 
-概念输入还包括执行器的组合配置（[examples/headless-agent/cordis.yml 第 35~41 行](../../deepseek-harness/examples/headless-agent/cordis.yml)）：
+概念输入还包括执行器的组合配置（[examples/headless-agent/cordis.yml 第 35~41 行](../deepseek-harness/examples/headless-agent/cordis.yml)）：
 
 ```yaml
 - id: subprocess
@@ -274,7 +274,7 @@ interface ShellExecutor {
   </tr>
 </table>
 
-配套产物——工具目录中的 bash 条目（[tool-catalog.md](../../deepseek-harness/docs/tool-catalog.md) 第 21 行起，生成的真实目录）：
+配套产物——工具目录中的 bash 条目（[tool-catalog.md](../deepseek-harness/docs/tool-catalog.md) 第 21 行起，生成的真实目录）：
 
 > | `@deepseek-ai/dsh-tool-bash` | `bash` | `ctx.tools`, `ctx.shell`, `ctx.systemPrompt`, `ctx.shellEnv`, `ctx.jobs at call time for run_in_background` | `tool/call`, `tool/result` | - | *The bash tool is the model-facing consumer of the bash executor seam…* |
 
@@ -308,7 +308,7 @@ Select-String -Path "docs\tool-catalog.md" -Pattern "dsh-tool-bash" | Select-Obj
 
 ### 任务 2：读接口定义
 
-打开 [packages/shell/shell/src/types.ts](../../deepseek-harness/packages/shell/shell/src/types.ts)，回答：`ShellExecRequest` 里哪些字段可选？`stdin` 字段的 JSDoc 说了什么？（答案：除 command 外全部可选；stdin 默认关闭，模型工具不暴露它，要用写 heredoc。）
+打开 [packages/shell/shell/src/types.ts](../deepseek-harness/packages/shell/shell/src/types.ts)，回答：`ShellExecRequest` 里哪些字段可选？`stdin` 字段的 JSDoc 说了什么？（答案：除 command 外全部可选；stdin 默认关闭，模型工具不暴露它，要用写 heredoc。）
 
 ### 任务 3（进阶）：对比两种执行器
 
@@ -352,15 +352,15 @@ Get-ChildItem "packages\shell\bash-local\src", "packages\shell\bash-sandbox\src"
 
 **官方（权威来源）**：
 
-- [docs/subsystems/shell.md](../../deepseek-harness/docs/subsystems/shell.md) —— 缝的完整契约（ShellExecSpec 全字段、环境命名空间）
-- [docs/capability-seams.md](../../deepseek-harness/docs/capability-seams.md) —— 全部能力缝的生成式关系图与缝表
-- [docs/subsystems/subprocess.md](../../deepseek-harness/docs/subsystems/subprocess.md) —— 进程树底层（shell 缝的下游）
-- [docs/subsystems/sandbox.md](../../deepseek-harness/docs/subsystems/sandbox.md) —— 沙箱缝（bash-sandbox 消费的接口）
-- [docs/tool-catalog.md](../../deepseek-harness/docs/tool-catalog.md) —— 全部模型工具的生成式目录（bash 条目见第 21 行附近）
+- [docs/subsystems/shell.md](../deepseek-harness/docs/subsystems/shell.md) —— 缝的完整契约（ShellExecSpec 全字段、环境命名空间）
+- [docs/capability-seams.md](../deepseek-harness/docs/capability-seams.md) —— 全部能力缝的生成式关系图与缝表
+- [docs/subsystems/subprocess.md](../deepseek-harness/docs/subsystems/subprocess.md) —— 进程树底层（shell 缝的下游）
+- [docs/subsystems/sandbox.md](../deepseek-harness/docs/subsystems/sandbox.md) —— 沙箱缝（bash-sandbox 消费的接口）
+- [docs/tool-catalog.md](../deepseek-harness/docs/tool-catalog.md) —— 全部模型工具的生成式目录（bash 条目见第 21 行附近）
 
 **决策记录（WHY 的一手来源）**：
 
-- 🔴 [.agents/notes/implemented/architecture/2026-06-13-capability-seams.md](../../deepseek-harness/.agents/notes/implemented/architecture/2026-06-13-capability-seams.md) —— 能力缝概念的诞生决策
+- 🔴 [.agents/notes/implemented/architecture/2026-06-13-capability-seams.md](../deepseek-harness/.agents/notes/implemented/architecture/2026-06-13-capability-seams.md) —— 能力缝概念的诞生决策
 
 **外部文献（按难度递增）**：
 

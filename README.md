@@ -18,6 +18,7 @@ deepseek-harness-StudyDocs/
 ├── README.md               # 本文件：项目说明 + 导航
 ├── 项目架构总览.md          # 总览层：文件树 + 对照表 + 路线图
 ├── 模块详解模板.md          # 写作层：统一范式与排版规范（v2.4）
+├── deepseek-harness/       # 上游源码快照（v0.1.0-rc.5，MIT 许可，见其 LICENSE）
 └── 详解/                    # 下钻层：系列正文（新篇持续追加于此）
     ├── 第01篇-vendor-Cordis框架层.md
     ├── 第02篇-core产品主干.md
@@ -25,7 +26,7 @@ deepseek-harness-StudyDocs/
     └── 第12篇-工程体系.md
 ```
 
-三层设计（总览 → 模板 → 详解）保证：**新读者从总览入手，作者按模板续写，正文按主题扩展**——可持续迭代管理。
+三层设计（总览 → 模板 → 详解）保证：**新读者从总览入手，作者按模板续写，正文按主题扩展**——可持续迭代管理。`deepseek-harness/` 是文档引用的**固定版本源码快照**（排除 node_modules/构建产物，约 45 MB），文档中的源码链接直接指向它，克隆本仓库即可离线使用全部链接。
 
 ## 系列索引（12 篇）
 
@@ -51,30 +52,23 @@ deepseek-harness-StudyDocs/
 3. **对照源码**：官方 JSDoc 全覆盖（`verify-export-jsdoc` 闸门），VS Code 里 hover 任意导出符号即可看到权威注释；
 4. **动手任务**：每篇第 4 节（动手验证）的命令已实测可运行，照抄即可复现产物。
 
-## 快速开始（重要：链接依赖本地源码）
+## 快速开始（源码已内嵌，开箱即用）
 
-文档中约 150 处 `../../deepseek-harness/...` 链接**指向 dsh 源码仓库，不是本文档仓库内的文件**。要在本地完整使用（点击直达源码、跑动手任务），请按**推荐布局**把两个仓库克隆为同级目录：
-
-```
-你的目录/
-├── deepseek-harness/            # ① 源码：git clone https://github.com/deepseek-ai/deepseek-harness
-└── deepseek-harness-StudyDocs/  # ② 本文档（已在此布局下编写）
-```
-
-然后：
+文档中约 160 处源码链接指向本仓库内的 **`deepseek-harness/` 目录**（上游 v0.1.0-rc.5 源码快照），**克隆本仓库即可完整使用全部链接**（VS Code 点击直达、行号定位、hover 查看官方 JSDoc），无需额外下载。
 
 ```bash
-cd deepseek-harness
-pnpm install          # 安装依赖（动手任务需要，Node ^22.19 || >=24）
+git clone https://github.com/jarvislee90s-dot/deepseek-harness-StudyDocs.git
+cd deepseek-harness-StudyDocs
+code .                # VS Code 打开，Ctrl+Shift+V 预览文档
 ```
 
-- **链接为什么这样设计**：这套文档的核心体验是"文档 ↔ 源码 ↔ 官方 JSDoc"三方对照（Ctrl+点击直达、hover 看注释、行号定位）——同级克隆后全部链接即刻生效，无需改任何文件；
-- **只浏览不下代码时**：正文、产物表格、图均完整可读；`../../deepseek-harness/...` 链接在网页上会 404，属预期行为，按上述布局克隆后即可恢复；
-- **动手任务**：涉及 `pnpm dsh`、快照 JSONL 解析的命令需要源码仓库，且部分命令需要 `DEEPSEEK_API_KEY`（无 key 的任务在文中已标注为 keyless 可跑）。
+- **源码快照说明**：`deepseek-harness/` 来自上游 [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)（MIT，Copyright (c) 2026 DeepSeek），已排除 node_modules/构建产物；上游 LICENSE 与 THIRD_PARTY_NOTICES.md 随目录保留。**文档与快照锁定同一版本**（v0.1.0-rc.5），保证行号/路径引用不漂移；
+- **动手任务**：涉及 `pnpm dsh` 的命令需要源码的依赖（`cd deepseek-harness && pnpm install`，Node ^22.19 || >=24），部分任务需要 `DEEPSEEK_API_KEY`（无 key 的任务在文中已标注为 keyless 可跑）；
+- **同步上游更新**：文档引用随快照版本固定；如需升级快照，从上游重新复制源码（保留 LICENSE）并核对文档行号——建议等上游发布新稳定版本后整体更新。
 
 ## 版本与维护
 
-- 本系列基于 **deepseek-harness v0.1.0-rc.5**（developer preview）编写；
+- 本系列基于 **deepseek-harness v0.1.0-rc.5**（developer preview）编写，源码快照见 `deepseek-harness/` 目录；
 - 仓库迭代迅速，文档引用的行号/文件路径可能随上游演进漂移——发现失效请提 issue 或 PR 修正；
 - 写作规范见 `模块详解模板.md`（v2.4），新增篇目照此格式续写至 `详解/` 目录。
 

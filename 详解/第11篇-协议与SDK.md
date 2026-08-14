@@ -31,27 +31,27 @@
 
 **R1 · 运行时可由外部进程驱动（sdk）**——调用方提供运行时可执行文件与 `cordis.yml`，SDK 经 **stdio 上的 JSON-RPC** 驱动运行时；SDK 组不创建、不配置、不构建、不启动开发者项目。
 
-- 实例：官方原文 *"This group contains the protocol stack for driving a Harness runtime from another process. Callers supply the runtime executable and its `cordis.yml`"*（[packages/sdk/README.md 第 5 行](../../deepseek-harness/packages/sdk/README.md)）。
+- 实例：官方原文 *"This group contains the protocol stack for driving a Harness runtime from another process. Callers supply the runtime executable and its `cordis.yml`"*（[packages/sdk/README.md 第 5 行](../deepseek-harness/packages/sdk/README.md)）。
 - 为什么必须：产品边界清晰——SDK 是"司机"，运行时是"车"，项目脚手架不是 SDK 的活。
 
 **R2 · 自动化协议互操作（acp）**——ACP 组把 agent 暴露给按 Agent Client Protocol 编程的客户端；它是**互操作传输层**，不是展示或人机交互层。
 
-- 实例：官方原文 *"It is an interoperability transport, not a presentation or human-interaction layer"*（[packages/acp/README.md 第 5 行](../../deepseek-harness/packages/acp/README.md)）。
+- 实例：官方原文 *"It is an interoperability transport, not a presentation or human-interaction layer"*（[packages/acp/README.md 第 5 行](../deepseek-harness/packages/acp/README.md)）。
 - 为什么必须：生态互操作 = 说行业标准语言，而不是发明私有协议。
 
 **R3 · 外部钩子可桥接（hooks）**——用户已有的 `hooks.json`（Claude Code/Codex 风格 shell 钩子）经桥插件在 harness 的**类型化拦截点**上忠实执行；"原生钩子"就是普通插件。
 
-- 实例：官方原文 *"a 'native hook' is just an ordinary Cordis plugin on those extension points. These packages are the bridges that translate the external shell-hook protocol onto that same surface"*（[packages/hooks/README.md 第 5 行](../../deepseek-harness/packages/hooks/README.md)）。
+- 实例：官方原文 *"a 'native hook' is just an ordinary Cordis plugin on those extension points. These packages are the bridges that translate the external shell-hook protocol onto that same surface"*（[packages/hooks/README.md 第 5 行](../deepseek-harness/packages/hooks/README.md)）。
 - 为什么必须：扩展面只有一个（harness 的类型化拦截点）；外部协议都是"翻译"。
 
 **R4 · MCP 客户端可接记忆（mcp）**——`mcp-client` 提供 MCP 协议客户端，示例组合（mcp-memory）接第三方记忆服务器。
 
-- 实例：`examples/mcp-memory/` 提供 engram/memorix 等记忆服务器的组合示例（[见仓库](../../deepseek-harness/examples/mcp-memory/README.md)）。
+- 实例：`examples/mcp-memory/` 提供 engram/memorix 等记忆服务器的组合示例（[见仓库](../deepseek-harness/examples/mcp-memory/README.md)）。
 - 为什么必须：记忆生态百花齐放（MCP 是标准），产品不该重造记忆轮子。
 
 **R5 · Python 一等公民（python）**——官方 Python SDK：`deepseek_harness`（高层 turns API + 低层 JSON-RPC 客户端）与 `deepseek_harness_runtime`（内置运行时二进制与默认配置）。
 
-- 实例：官方原文 *"Python packages for driving DeepSeek Harness as a subprocess. The client SDK communicates with the bundled runtime over newline-delimited JSON-RPC on stdio"*（[python/README.md 第 5 行](../../deepseek-harness/python/README.md)）。
+- 实例：官方原文 *"Python packages for driving DeepSeek Harness as a subprocess. The client SDK communicates with the bundled runtime over newline-delimited JSON-RPC on stdio"*（[python/README.md 第 5 行](../deepseek-harness/python/README.md)）。
 - 为什么必须：AI 生态的脚本语言是 Python；一等公民 SDK = 生态入口。
 
 ### 0.3 非功能需求
@@ -75,7 +75,7 @@
 
 ### 0.5 边界与不做什么
 
-- **SDK 不做项目脚手架**：不创建/配置/构建/启动开发者项目（[sdk/README.md 第 5 行](../../deepseek-harness/packages/sdk/README.md)）。
+- **SDK 不做项目脚手架**：不创建/配置/构建/启动开发者项目（[sdk/README.md 第 5 行](../deepseek-harness/packages/sdk/README.md)）。
 - **ACP 不做展示层**：不负责 UI 或人机交互（那是 client/ 的事）。
 - **hooks 不发明协议**：只桥接既有 shell-hook 协议；原生扩展走 harness 拦截点。
 - **MCP 不内置记忆**：记忆实现来自第三方服务器，产品只提供客户端。
@@ -155,17 +155,17 @@ flowchart LR
 
 | 顺序 | 文件（点击直达） | 关注点 | 对应需求 |
 |---|---|---|---|
-| 1 | [packages/sdk/protocol/src](../../deepseek-harness/packages/sdk/protocol/src) | 运行时线协议定义 | R1 |
-| 2 | [packages/sdk/client/src](../../deepseek-harness/packages/sdk/client/src) | TypeScript 客户端 API | R1 |
-| 3 | [packages/sdk/server/src](../../deepseek-harness/packages/sdk/server/src) | stdio JSON-RPC 服务端 | R1 |
-| 4 | [packages/acp/acp/src](../../deepseek-harness/packages/acp/acp/src) | ACP 服务器 | R2 |
-| 5 | [packages/hooks/hook-protocol/src](../../deepseek-harness/packages/hooks/hook-protocol/src) | 共享 shell-hook 协议库 | R3 |
-| 6 | [packages/mcp/mcp-client/src](../../deepseek-harness/packages/mcp/mcp-client/src) | MCP 客户端 | R4 |
-| 7 | [python/sdk/src/deepseek_harness/client.py](../../deepseek-harness/python/sdk/src/deepseek_harness/client.py) | Python 客户端 | R5 |
+| 1 | [packages/sdk/protocol/src](../deepseek-harness/packages/sdk/protocol/src) | 运行时线协议定义 | R1 |
+| 2 | [packages/sdk/client/src](../deepseek-harness/packages/sdk/client/src) | TypeScript 客户端 API | R1 |
+| 3 | [packages/sdk/server/src](../deepseek-harness/packages/sdk/server/src) | stdio JSON-RPC 服务端 | R1 |
+| 4 | [packages/acp/acp/src](../deepseek-harness/packages/acp/acp/src) | ACP 服务器 | R2 |
+| 5 | [packages/hooks/hook-protocol/src](../deepseek-harness/packages/hooks/hook-protocol/src) | 共享 shell-hook 协议库 | R3 |
+| 6 | [packages/mcp/mcp-client/src](../deepseek-harness/packages/mcp/mcp-client/src) | MCP 客户端 | R4 |
+| 7 | [python/sdk/src/deepseek_harness/client.py](../deepseek-harness/python/sdk/src/deepseek_harness/client.py) | Python 客户端 | R5 |
 
 ### 2.2 关键实现片段
 
-**片段 A：Python 最小驱动**（[examples/jsonrpc-agent/minimal.py 第 30~39 行](../../deepseek-harness/examples/jsonrpc-agent/minimal.py)）
+**片段 A：Python 最小驱动**（[examples/jsonrpc-agent/minimal.py 第 30~39 行](../deepseek-harness/examples/jsonrpc-agent/minimal.py)）
 
 ```python
 with DeepSeekHarness(
@@ -181,7 +181,7 @@ print(result.final_response)
 
 翻译：Python 一等公民（R5）的最小形态——`DeepSeekHarness` 上下文管理器：传入提供者、模型、工作区、会话根与 `cordis.yml` 路径，`run()` 一个任务，打印 `final_response`。文件头注释说明（第 2 行）：*"Run one minimal-agent turn through the bundled Python SDK runtime"*——SDK 驱动**内置运行时**（R1 的"司机"模式）。
 
-**片段 B：sdk 组的分工**（[packages/sdk/README.md 第 7~11 行](../../deepseek-harness/packages/sdk/README.md)）
+**片段 B：sdk 组的分工**（[packages/sdk/README.md 第 7~11 行](../deepseek-harness/packages/sdk/README.md)）
 
 | Package | Role |
 |---|---|
@@ -191,7 +191,7 @@ print(result.final_response)
 
 翻译：三包分工即决策 D2——协议独立定义、TS 客户端消费、服务端承接。注意官方边界声明（第 5 行）：*"Callers supply the runtime executable and its cordis.yml; this group does not create, configure, build, or launch developer projects"*——SDK 不代管项目（P3）。
 
-**片段 C：hooks 的桥接定位**（[packages/hooks/README.md 第 5 行](../../deepseek-harness/packages/hooks/README.md)）
+**片段 C：hooks 的桥接定位**（[packages/hooks/README.md 第 5 行](../deepseek-harness/packages/hooks/README.md)）
 
 > a "native hook" is just an ordinary Cordis plugin on those extension points. These packages are the **bridges** that translate the external shell-hook protocol onto that same surface, plus the shared wire-protocol library they build on.
 
@@ -199,13 +199,13 @@ print(result.final_response)
 
 ### 2.3 符号 hover 指引
 
-在 VS Code 打开 [packages/sdk/protocol/src](../../deepseek-harness/packages/sdk/protocol/src) 的协议定义文件 hover 各消息类型；打开 [python/sdk/src/deepseek_harness/client.py](../../deepseek-harness/python/sdk/src/deepseek_harness/client.py) 查看 Python 客户端类。
+在 VS Code 打开 [packages/sdk/protocol/src](../deepseek-harness/packages/sdk/protocol/src) 的协议定义文件 hover 各消息类型；打开 [python/sdk/src/deepseek_harness/client.py](../deepseek-harness/python/sdk/src/deepseek_harness/client.py) 查看 Python 客户端类。
 
 ## 3 产物演示（EXAMPLE）
 
 ### 3.1 输入
 
-真实文件 [examples/jsonrpc-agent/minimal.py](../../deepseek-harness/examples/jsonrpc-agent/minimal.py)（43 行，官方 Python 最小示例），配套组合 [minimal.cordis.yml](../../deepseek-harness/examples/jsonrpc-agent/minimal.cordis.yml)：
+真实文件 [examples/jsonrpc-agent/minimal.py](../deepseek-harness/examples/jsonrpc-agent/minimal.py)（43 行，官方 Python 最小示例），配套组合 [minimal.cordis.yml](../deepseek-harness/examples/jsonrpc-agent/minimal.cordis.yml)：
 
 ```powershell
 python examples/jsonrpc-agent/minimal.py "1+1等于几" --model deepseek-v4-flash
@@ -254,7 +254,7 @@ Get-Content "examples\jsonrpc-agent\minimal.py"
 Get-ChildItem "packages\sdk" -Directory | Select-Object Name
 ```
 
-**预期**：protocol / client / server。**判据**：对照 [packages/sdk/README.md 第 7~11 行](../../deepseek-harness/packages/sdk/README.md) 的分工表。
+**预期**：protocol / client / server。**判据**：对照 [packages/sdk/README.md 第 7~11 行](../deepseek-harness/packages/sdk/README.md) 的分工表。
 
 ### 任务 3（进阶）：看 hooks 桥的方言
 
@@ -262,7 +262,7 @@ Get-ChildItem "packages\sdk" -Directory | Select-Object Name
 Get-ChildItem "packages\hooks" -Directory | Select-Object Name
 ```
 
-**预期**：hook-protocol / hooks-claude-code / hooks-codex。**判据**：对照 [packages/hooks/README.md 第 7~11 行](../../deepseek-harness/packages/hooks/README.md)——共享协议库 + 每桥管方言（D3）。
+**预期**：hook-protocol / hooks-claude-code / hooks-codex。**判据**：对照 [packages/hooks/README.md 第 7~11 行](../deepseek-harness/packages/hooks/README.md)——共享协议库 + 每桥管方言（D3）。
 
 ## 5 FAQ 与自测（❓）
 
@@ -297,11 +297,11 @@ Get-ChildItem "packages\hooks" -Directory | Select-Object Name
 
 **官方（权威来源）**：
 
-- [packages/sdk/README.md](../../deepseek-harness/packages/sdk/README.md) —— SDK 组边界与三包
-- [packages/acp/README.md](../../deepseek-harness/packages/acp/README.md) —— ACP 组定位
-- [packages/hooks/README.md](../../deepseek-harness/packages/hooks/README.md) —— hooks 桥架构
-- [python/README.md](../../deepseek-harness/python/README.md) —— Python SDK 包结构与行为
-- [examples/jsonrpc-agent/minimal.py](../../deepseek-harness/examples/jsonrpc-agent/minimal.py) —— 官方 Python 最小示例
+- [packages/sdk/README.md](../deepseek-harness/packages/sdk/README.md) —— SDK 组边界与三包
+- [packages/acp/README.md](../deepseek-harness/packages/acp/README.md) —— ACP 组定位
+- [packages/hooks/README.md](../deepseek-harness/packages/hooks/README.md) —— hooks 桥架构
+- [python/README.md](../deepseek-harness/python/README.md) —— Python SDK 包结构与行为
+- [examples/jsonrpc-agent/minimal.py](../deepseek-harness/examples/jsonrpc-agent/minimal.py) —— 官方 Python 最小示例
 
 **外部文献（按难度递增）**：
 

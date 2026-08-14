@@ -165,17 +165,17 @@ flowchart BT
 
 | 顺序 | 文件（点击直达） | 关注点 | 对应需求 |
 |---|---|---|---|
-| 1 | [packages/core/session/src/types.ts](../../deepseek-harness/packages/core/session/src/types.ts) | `SessionEventMap`：事件词汇表（约第 27 行起） | R1/R3 |
-| 2 | [packages/core/session/src/index.ts](../../deepseek-harness/packages/core/session/src/index.ts) | `Session` 类：append-only 日志与 store | R1 |
-| 3 | [packages/core/tools/src/index.ts](../../deepseek-harness/packages/core/tools/src/index.ts) | `ToolDefinition` 与守卫管线 | R2 |
-| 4 | [packages/core/agent/src/index.ts](../../deepseek-harness/packages/core/agent/src/index.ts) | `AgentRegistry`（create/resume/setFactory） | R4 |
-| 5 | [packages/core/agent/src/types.ts](../../deepseek-harness/packages/core/agent/src/types.ts) | `Agent` 接口（send/cancel/whenIdle） | R3/R4 |
-| 6 | [packages/core/agent-loop/src](../../deepseek-harness/packages/core/agent-loop/src) | 默认循环实现（扫读目录结构即可） | R3/R4 |
-| 7 | [packages/core/system-prompt/src](../../deepseek-harness/packages/core/system-prompt/src) | 提示词组装 | R3 |
+| 1 | [packages/core/session/src/types.ts](../deepseek-harness/packages/core/session/src/types.ts) | `SessionEventMap`：事件词汇表（约第 27 行起） | R1/R3 |
+| 2 | [packages/core/session/src/index.ts](../deepseek-harness/packages/core/session/src/index.ts) | `Session` 类：append-only 日志与 store | R1 |
+| 3 | [packages/core/tools/src/index.ts](../deepseek-harness/packages/core/tools/src/index.ts) | `ToolDefinition` 与守卫管线 | R2 |
+| 4 | [packages/core/agent/src/index.ts](../deepseek-harness/packages/core/agent/src/index.ts) | `AgentRegistry`（create/resume/setFactory） | R4 |
+| 5 | [packages/core/agent/src/types.ts](../deepseek-harness/packages/core/agent/src/types.ts) | `Agent` 接口（send/cancel/whenIdle） | R3/R4 |
+| 6 | [packages/core/agent-loop/src](../deepseek-harness/packages/core/agent-loop/src) | 默认循环实现（扫读目录结构即可） | R3/R4 |
+| 7 | [packages/core/system-prompt/src](../deepseek-harness/packages/core/system-prompt/src) | 提示词组装 | R3 |
 
 ### 2.2 关键实现片段
 
-**片段 A：事件词汇表的一角——turn 的开始与结束**（[session/src/types.ts](../../deepseek-harness/packages/core/session/src/types.ts)）
+**片段 A：事件词汇表的一角——turn 的开始与结束**（[session/src/types.ts](../deepseek-harness/packages/core/session/src/types.ts)）
 
 ```ts
 interface SessionEventMap {
@@ -192,7 +192,7 @@ interface SessionEventMap {
 
 翻译：四个事件定义了"轮"和"步"的边界（R3）。**turn** 是一次完整的交互轮次（从用户提问到最终答复）；**step** 是轮内的一次"模型请求 + 它触发的工具执行"——一个 turn 可以包含多个 step（模型调用工具后还要继续思考）。事件名是契约（P4）：任何插件都能监听、任何 UI 都能渲染，而 payload 就是公开协议。
 
-**片段 B：工具的定义 = schema + 执行函数**（[tools/src/index.ts](../../deepseek-harness/packages/core/tools/src/index.ts)）
+**片段 B：工具的定义 = schema + 执行函数**（[tools/src/index.ts](../deepseek-harness/packages/core/tools/src/index.ts)）
 
 ```ts
 interface ToolDefinition extends ToolSchema {
@@ -203,7 +203,7 @@ interface ToolDefinition extends ToolSchema {
 
 翻译：一个注册的工具由两部分组成——**schema**（模型可见的调用说明，进提示词）和 **execute**（真正干活）。`output` 声明返回值的 JSON Schema，每次成功的结果都要通过校验（N1）。模型永远只看到 schema，永远碰不到 execute 内部——这就是"模型可安全调用"的结构基础（R2）。
 
-**片段 C：Agent 接口的对外面**（[agent/src/types.ts](../../deepseek-harness/packages/core/agent/src/types.ts)）
+**片段 C：Agent 接口的对外面**（[agent/src/types.ts](../deepseek-harness/packages/core/agent/src/types.ts)）
 
 ```ts
 interface Agent {
@@ -221,13 +221,13 @@ interface Agent {
 
 ### 2.3 符号 hover 指引
 
-在 VS Code 打开 [packages/core/session/src/types.ts](../../deepseek-harness/packages/core/session/src/types.ts)，hover `SessionEventMap` 或任一事件键可看官方 JSDoc（含 `@mode` 分发模式标注）；打开 [packages/core/tools/src/index.ts](../../deepseek-harness/packages/core/tools/src/index.ts) hover `ToolDefinition.execute` 可看执行契约（信号、quiescence、返回值规范）。
+在 VS Code 打开 [packages/core/session/src/types.ts](../deepseek-harness/packages/core/session/src/types.ts)，hover `SessionEventMap` 或任一事件键可看官方 JSDoc（含 `@mode` 分发模式标注）；打开 [packages/core/tools/src/index.ts](../deepseek-harness/packages/core/tools/src/index.ts) hover `ToolDefinition.execute` 可看执行契约（信号、quiescence、返回值规范）。
 
 ## 3 产物演示（EXAMPLE）
 
 ### 3.1 输入
 
-一个真实任务（来自仓库快照 `examples/acp-agent/tests/snapshots/bash-tool-turn/`，[完整文件见此处](../../deepseek-harness/examples/acp-agent/tests/snapshots/bash-tool-turn/session.jsonl)）：
+一个真实任务（来自仓库快照 `examples/acp-agent/tests/snapshots/bash-tool-turn/`，[完整文件见此处](../deepseek-harness/examples/acp-agent/tests/snapshots/bash-tool-turn/session.jsonl)）：
 
 > Use the bash tool to run exactly: echo TERMINAL_OK. Then reply with the single word DONE and stop.
 
@@ -352,11 +352,11 @@ $c | ForEach-Object { ($_ | ConvertFrom-Json).type } | Group-Object |
 
 ### 任务 2：读事件词汇表
 
-打开 [packages/core/session/src/types.ts](../../deepseek-harness/packages/core/session/src/types.ts)，在 `SessionEventMap` 里找出 5 个 `assistant/*` 事件，并 hover 看官方 JSDoc。
+打开 [packages/core/session/src/types.ts](../deepseek-harness/packages/core/session/src/types.ts)，在 `SessionEventMap` 里找出 5 个 `assistant/*` 事件，并 hover 看官方 JSDoc。
 
 ### 任务 3（进阶）：对比多轮会话的结构
 
-打开 [examples/acp-agent/tests/snapshots/multi-turn/session.jsonl](../../deepseek-harness/examples/acp-agent/tests/snapshots/multi-turn/session.jsonl)，数一数有几个 `turn/start`；再对比 `bash-tool-turn`——验证"一个 turn 可以有多个 step，一个会话可以有多个 turn"。
+打开 [examples/acp-agent/tests/snapshots/multi-turn/session.jsonl](../deepseek-harness/examples/acp-agent/tests/snapshots/multi-turn/session.jsonl)，数一数有几个 `turn/start`；再对比 `bash-tool-turn`——验证"一个 turn 可以有多个 step，一个会话可以有多个 turn"。
 
 ## 5 FAQ 与自测（❓）
 
@@ -391,15 +391,15 @@ $c | ForEach-Object { ($_ | ConvertFrom-Json).type } | Group-Object |
 
 **官方（权威来源）**：
 
-- [docs/subsystems/core.md](../../deepseek-harness/docs/subsystems/core.md) —— agent/agent-loop 全契约（含生成 API 面）
-- [docs/subsystems/session.md](../../deepseek-harness/docs/subsystems/session.md) —— `SessionEventMap` 全词汇表（849 行，本篇只摘了一角）
-- [docs/subsystems/tools.md](../../deepseek-harness/docs/subsystems/tools.md) —— 守卫管线与 `ToolDefinition` 全字段
-- [docs/agent-lifecycle.md](../../deepseek-harness/docs/agent-lifecycle.md) —— turn/step 全时序图（82 行，含 cancel/error 分支）
-- [docs/architecture.md](../../deepseek-harness/docs/architecture.md) —— "Turn flow" 一节
+- [docs/subsystems/core.md](../deepseek-harness/docs/subsystems/core.md) —— agent/agent-loop 全契约（含生成 API 面）
+- [docs/subsystems/session.md](../deepseek-harness/docs/subsystems/session.md) —— `SessionEventMap` 全词汇表（849 行，本篇只摘了一角）
+- [docs/subsystems/tools.md](../deepseek-harness/docs/subsystems/tools.md) —— 守卫管线与 `ToolDefinition` 全字段
+- [docs/agent-lifecycle.md](../deepseek-harness/docs/agent-lifecycle.md) —— turn/step 全时序图（82 行，含 cancel/error 分支）
+- [docs/architecture.md](../deepseek-harness/docs/architecture.md) —— "Turn flow" 一节
 
 **决策记录（WHY 的一手来源）**：
 
-- 🔴 [.agents/notes/implemented/architecture/](../../deepseek-harness/.agents/notes/implemented/architecture/) —— 按主题浏览"为什么"：会话日志版本机制、capability seams、initiator scope 等
+- 🔴 [.agents/notes/implemented/architecture/](../deepseek-harness/.agents/notes/implemented/architecture/) —— 按主题浏览"为什么"：会话日志版本机制、capability seams、initiator scope 等
 
 **外部文献（按难度递增）**：
 

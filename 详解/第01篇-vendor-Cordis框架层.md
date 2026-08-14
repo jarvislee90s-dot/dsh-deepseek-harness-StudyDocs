@@ -192,17 +192,17 @@ flowchart BT
 
 | 顺序 | 文件（点击直达） | 关注点 | 对应需求 |
 |---|---|---|---|
-| 1 | [vendor/README.md](../../deepseek-harness/vendor/README.md) | manifest 表（9 包 + 版本 + commit）与 18 项本地修改日志 | R5 / N3 |
-| 2 | [vendor/cordis/src/context.ts](../../deepseek-harness/vendor/cordis/src/context.ts) | `Context` 类：服务注册与取用 | R1/R2 |
-| 3 | [vendor/cordis/src/events.ts](../../deepseek-harness/vendor/cordis/src/events.ts) | `DispatchMode`（第 32 行）、`waterfall`（第 86 行）、`on`（第 97 行） | R2/R5 |
-| 4 | [vendor/cordis/src/fiber.ts](../../deepseek-harness/vendor/cordis/src/fiber.ts) | 插件生命周期与 `effect` 机制（扫读） | R5 |
-| 5 | [vendor/loader/src/index.ts](../../deepseek-harness/vendor/loader/src/index.ts) | Loader：配置行 → 插件实例 | R3 |
-| 6 | [vendor/include/src/index.ts](../../deepseek-harness/vendor/include/src/index.ts) | Include：补丁叠层 + `!!js` 表达式 | R3 |
-| 7 | [vendor/schemastery](../../deepseek-harness/vendor/schemastery) | 配置 schema 校验——"可拆卸"的安全网 | R1 / N5 |
+| 1 | [vendor/README.md](../deepseek-harness/vendor/README.md) | manifest 表（9 包 + 版本 + commit）与 18 项本地修改日志 | R5 / N3 |
+| 2 | [vendor/cordis/src/context.ts](../deepseek-harness/vendor/cordis/src/context.ts) | `Context` 类：服务注册与取用 | R1/R2 |
+| 3 | [vendor/cordis/src/events.ts](../deepseek-harness/vendor/cordis/src/events.ts) | `DispatchMode`（第 32 行）、`waterfall`（第 86 行）、`on`（第 97 行） | R2/R5 |
+| 4 | [vendor/cordis/src/fiber.ts](../deepseek-harness/vendor/cordis/src/fiber.ts) | 插件生命周期与 `effect` 机制（扫读） | R5 |
+| 5 | [vendor/loader/src/index.ts](../deepseek-harness/vendor/loader/src/index.ts) | Loader：配置行 → 插件实例 | R3 |
+| 6 | [vendor/include/src/index.ts](../deepseek-harness/vendor/include/src/index.ts) | Include：补丁叠层 + `!!js` 表达式 | R3 |
+| 7 | [vendor/schemastery](../deepseek-harness/vendor/schemastery) | 配置 schema 校验——"可拆卸"的安全网 | R1 / N5 |
 
 ### 2.2 关键实现片段
 
-**片段 A：事件分发的类型定义**（[events.ts 第 29~32 行](../../deepseek-harness/vendor/cordis/src/events.ts)）
+**片段 A：事件分发的类型定义**（[events.ts 第 29~32 行](../deepseek-harness/vendor/cordis/src/events.ts)）
 
 ```ts
 export type DispatchMode = 'emit' | 'parallel' | 'serial' | 'bail' | 'waterfall'
@@ -210,7 +210,7 @@ export type DispatchMode = 'emit' | 'parallel' | 'serial' | 'bail' | 'waterfall'
 
 翻译：事件总线的五种通讯方式。`emit` 广播不等结果；`parallel` 并行分发并等待全部完成；`serial` 按注册顺序串行、结果逐级传递；`waterfall` 与 serial 类似，但监听者可**改写**传给下一个的值，也可**不调用 `next()`** 直接截停——策略/拦截类插件的挂载点（R2）；`bail` 一票否决即停。
 
-**片段 B：注册的返回值就是撤销器**（[events.ts 第 97 行](../../deepseek-harness/vendor/cordis/src/events.ts)）
+**片段 B：注册的返回值就是撤销器**（[events.ts 第 97 行](../deepseek-harness/vendor/cordis/src/events.ts)）
 
 ```ts
 on<K extends keyof Events>(name: K, listener: Events[K], options?: boolean | EventOptions): () => boolean
@@ -218,7 +218,7 @@ on<K extends keyof Events>(name: K, listener: Events[K], options?: boolean | Eve
 
 翻译：`on` 是泛型方法——`name` 必须是**已声明的事件名**（编译期检查）；`listener` 是处理函数；**返回值是一个"取消监听"的函数**。"注册即返回撤销器"就写在这个签名里：框架层保证任何注册都可逆（R5），插件卸载时逐个调用这些返回值完成回滚。
 
-**片段 C：一个真实配置行 = 一个插件**（[examples/headless-agent/cordis.yml 第 9~32 行](../../deepseek-harness/examples/headless-agent/cordis.yml)）
+**片段 C：一个真实配置行 = 一个插件**（[examples/headless-agent/cordis.yml 第 9~32 行](../deepseek-harness/examples/headless-agent/cordis.yml)）
 
 ```yaml
 - id: settings
@@ -238,7 +238,7 @@ on<K extends keyof Events>(name: K, listener: Events[K], options?: boolean | Eve
 
 ### 2.3 符号 hover 指引：让"源码 + 注释"直接匹配展示
 
-这个仓库强制 `verify-export-jsdoc` 闸门——**所有导出符号必须带完整 JSDoc**。在 VS Code 打开 [vendor/cordis/src/context.ts](../../deepseek-harness/vendor/cordis/src/context.ts)，hover `class Context` 或任意方法可查看官方契约注释；打开 [events.ts](../../deepseek-harness/vendor/cordis/src/events.ts) hover `waterfall` 重载可查看事件语义。
+这个仓库强制 `verify-export-jsdoc` 闸门——**所有导出符号必须带完整 JSDoc**。在 VS Code 打开 [vendor/cordis/src/context.ts](../deepseek-harness/vendor/cordis/src/context.ts)，hover `class Context` 或任意方法可查看官方契约注释；打开 [events.ts](../deepseek-harness/vendor/cordis/src/events.ts) hover `waterfall` 重载可查看事件语义。
 
 ## 3 产物演示（EXAMPLE）
 
@@ -377,11 +377,11 @@ pnpm dsh --profile headless --dump-config > dump.yml
 
 ### 任务 2：验证"框架被买断"
 
-打开 [vendor/README.md](../../deepseek-harness/vendor/README.md) 的 manifest 表，回答三问：一共几个包？`cordis` 的版本与 commit？18 项本地修改第 1 项改了什么、为什么？（答案：9 个；`4.0.0-rc.7` / `56b3d4f7…`；`hmr/src/index.ts`，去掉依赖运行时 YAML 钩子的 i18n 导入。）
+打开 [vendor/README.md](../deepseek-harness/vendor/README.md) 的 manifest 表，回答三问：一共几个包？`cordis` 的版本与 commit？18 项本地修改第 1 项改了什么、为什么？（答案：9 个；`4.0.0-rc.7` / `56b3d4f7…`；`hmr/src/index.ts`，去掉依赖运行时 YAML 钩子的 i18n 导入。）
 
 ### 任务 3（进阶）：手写配置 vs 实际生效的树
 
-对比 [examples/headless-agent/cordis.yml](../../deepseek-harness/examples/headless-agent/cordis.yml)（手写）与 `dump.yml`（实际生效）：找**都出现**的插件（settings、credentials、llm-deepseek……）；找 **dump.yml 有而手写文件没有**的（timer、hmr——base bundle 默认携带）。结论：你的配置只是"加料"，底层永远有基础层兜底——这就是 patch 层叠。
+对比 [examples/headless-agent/cordis.yml](../deepseek-harness/examples/headless-agent/cordis.yml)（手写）与 `dump.yml`（实际生效）：找**都出现**的插件（settings、credentials、llm-deepseek……）；找 **dump.yml 有而手写文件没有**的（timer、hmr——base bundle 默认携带）。结论：你的配置只是"加料"，底层永远有基础层兜底——这就是 patch 层叠。
 
 ## 5 FAQ 与自测（❓）
 
@@ -390,8 +390,8 @@ pnpm dsh --profile headless --dump-config > dump.yml
 - **Q1：为什么不直接 `npm install cordis`？** 普通项目应该；但 dsh 是"框架即产品"，需要可控、可审计、可打补丁、可发布（D1/D2）。
 - **Q2：可拆卸和"删代码"有什么区别？** 可拆卸是**配置级**操作（`disabled: true` 或换 bundle），代码仍在、随时可恢复，HMR 支持运行中切换；删代码是源码级、不可逆。
 - **Q3：插件和 Service 什么关系？** Service 是插件挂到 ctx 上的"对外能力"（如 `ctx.tools`）；插件是载体——一个插件可声明多个 Service，也可只监听事件。
-- **Q4：我要写插件，需要动 vendor/ 吗？** 不需要。写插件 = 在 `packages/` 新建包或直接改配置组合（参考 [examples/](../../deepseek-harness/examples/)）；vendor/ 是框架层，改动要走同步流程。
-- **Q5：上游 cordis 更新了怎么办？** 按 [vendor/README.md](../../deepseek-harness/vendor/README.md) 同步流程：拉新 commit → 重放/退休本地修改 → `pnpm run test && pnpm run build` → 更新 manifest。
+- **Q4：我要写插件，需要动 vendor/ 吗？** 不需要。写插件 = 在 `packages/` 新建包或直接改配置组合（参考 [examples/](../deepseek-harness/examples/)）；vendor/ 是框架层，改动要走同步流程。
+- **Q5：上游 cordis 更新了怎么办？** 按 [vendor/README.md](../deepseek-harness/vendor/README.md) 同步流程：拉新 commit → 重放/退休本地修改 → `pnpm run test && pnpm run build` → 更新 manifest。
 
 ### 自测（答案折叠在下方）
 
@@ -416,17 +416,17 @@ pnpm dsh --profile headless --dump-config > dump.yml
 
 **官方（权威来源）**：
 
-- [docs/cordis-primer.md](../../deepseek-harness/docs/cordis-primer.md) —— Cordis 五理念 + 分发模式表（本篇的官方版）
-- [docs/cordis-tutorial/index.md](../../deepseek-harness/docs/cordis-tutorial/index.md) —— 7 章手把手教程（写第 02 篇前建议刷完 1~3 章）
-- [docs/architecture.md](../../deepseek-harness/docs/architecture.md) —— "Profiles and bundles" 一节与本篇直接相关
-- [docs/rescope.md](../../deepseek-harness/docs/rescope.md) —— 改名机制详解
+- [docs/cordis-primer.md](../deepseek-harness/docs/cordis-primer.md) —— Cordis 五理念 + 分发模式表（本篇的官方版）
+- [docs/cordis-tutorial/index.md](../deepseek-harness/docs/cordis-tutorial/index.md) —— 7 章手把手教程（写第 02 篇前建议刷完 1~3 章）
+- [docs/architecture.md](../deepseek-harness/docs/architecture.md) —— "Profiles and bundles" 一节与本篇直接相关
+- [docs/rescope.md](../deepseek-harness/docs/rescope.md) —— 改名机制详解
 
 **外部文献（按难度递增）**：
 
 - 🟢 [Cordis 官方仓库](https://github.com/cordiverse/cordis) —— 上游源码
 - 🟡 [《A Programming Paradigm for Spatiotemporal Composability》](https://github.com/cordiverse/paper) —— Cordis 的设计论文（开源）：解释"可组合、可逆、可时空分离"的编程范式；读不懂论文没关系，先看摘要与插图
 - 🟡 [schemastery](https://github.com/cordiverse/schemastery) / [cosmokit](https://github.com/cordiverse/cosmokit) —— 配置校验库与工具库的上游
-- 🔴 [vendor/README.md 第 6 项修改](../../deepseek-harness/vendor/README.md) —— fiber 生命周期加固：一篇"框架级 bug 实战"案例，进阶者精读
+- 🔴 [vendor/README.md 第 6 项修改](../deepseek-harness/vendor/README.md) —— fiber 生命周期加固：一篇"框架级 bug 实战"案例，进阶者精读
 
 ---
 

@@ -29,7 +29,7 @@
 
 **R1 · 词汇统一**——`Message` / `ContentBlock` 是**唯一**的会话词汇：投递（delivery）、持久历史（durable history）、模型请求（model request）三处共用同一份类型。
 
-- 实例：官方表述 *"One immutable message representation shared by delivery, durable history, and model requests"*（[llm-streaming.md 第 54 行](../../deepseek-harness/docs/subsystems/llm-streaming.md)）。
+- 实例：官方表述 *"One immutable message representation shared by delivery, durable history, and model requests"*（[llm-streaming.md 第 54 行](../deepseek-harness/docs/subsystems/llm-streaming.md)）。
 - 为什么必须：三处各建一套消息类型 = 三份转换代码 + 三份漂移风险。
 
 **R2 · 适配可插拔**——`LlmAdapter` 是适配器契约；任何提供商实现它即可接入，循环只依赖契约不依赖具体适配器。
@@ -39,12 +39,12 @@
 
 **R3 · 元数据权威单点**——contextWindow、reasoningEffort 等"精确路由"元数据，由**服务该路由的适配器**解析，消费者不重复解析、不自行猜测。
 
-- 实例：官方表述 *"Correctness-sensitive metadata is resolved separately from the advisory catalog and is owned by the adapter serving the exact route"*（[llm-streaming.md 第 407 行](../../deepseek-harness/docs/subsystems/llm-streaming.md)）。
+- 实例：官方表述 *"Correctness-sensitive metadata is resolved separately from the advisory catalog and is owned by the adapter serving the exact route"*（[llm-streaming.md 第 407 行](../deepseek-harness/docs/subsystems/llm-streaming.md)）。
 - 为什么必须：模型能力（上下文窗口、思考档位）只有适配器最清楚；多份解析必然打架。
 
 **R4 · 类型安全远程调用（typert）**——宿主能力通过**生成式类型契约**暴露给远程消费者：wire 上只传 endpoint + 命名参数，类型与 schema 由生成器保证。
 
-- 实例：`TypertLookupMap` / `TypertContextMap` 通过声明合并扩展，Host 对象与 wire 身份的映射是**编译期声明**（[typert.md 第 9 行](../../deepseek-harness/docs/subsystems/typert.md)）。
+- 实例：`TypertLookupMap` / `TypertContextMap` 通过声明合并扩展，Host 对象与 wire 身份的映射是**编译期声明**（[typert.md 第 9 行](../deepseek-harness/docs/subsystems/typert.md)）。
 - 为什么必须：手写 JSON-RPC 的调用方与实现方必然漂移；生成式契约让漂移在编译期暴露。
 
 ### 0.3 非功能需求
@@ -143,17 +143,17 @@ flowchart LR
 
 | 顺序 | 文件（点击直达） | 关注点 | 对应需求 |
 |---|---|---|---|
-| 1 | [packages/llm/llm/src/types.ts](../../deepseek-harness/packages/llm/llm/src/types.ts) | `ContentBlockMap`、`Message`、`AssistantProvenance` | R1 / N1 |
-| 2 | [packages/llm/llm/src/message.ts](../../deepseek-harness/packages/llm/llm/src/message.ts) | `MessageSourceMap`：消息来源声明合并 | R1 |
-| 3 | [packages/llm/llm/src/index.ts](../../deepseek-harness/packages/llm/llm/src/index.ts) | `LlmAdapter` 契约与 `LlmRuntime` | R2 |
-| 4 | [packages/llm/llm-deepseek/src](../../deepseek-harness/packages/llm/llm-deepseek/src) | DeepSeek 适配器实现（对照理解契约） | R2 |
-| 5 | [packages/llm/llm-retry/src](../../deepseek-harness/packages/llm/llm-retry/src) | 重试策略插件（挂在请求上的守卫） | R2/R3 |
-| 6 | [packages/typert/protocol/src/types.ts](../../deepseek-harness/packages/typert/protocol/src/types.ts) | `TypertLookupMap` / `TypertContextMap` / `TypertCodec` | R4 |
-| 7 | [packages/api/gateway/src/types.ts](../../deepseek-harness/packages/api/gateway/src/types.ts) | Host 网关类型 | R4 |
+| 1 | [packages/llm/llm/src/types.ts](../deepseek-harness/packages/llm/llm/src/types.ts) | `ContentBlockMap`、`Message`、`AssistantProvenance` | R1 / N1 |
+| 2 | [packages/llm/llm/src/message.ts](../deepseek-harness/packages/llm/llm/src/message.ts) | `MessageSourceMap`：消息来源声明合并 | R1 |
+| 3 | [packages/llm/llm/src/index.ts](../deepseek-harness/packages/llm/llm/src/index.ts) | `LlmAdapter` 契约与 `LlmRuntime` | R2 |
+| 4 | [packages/llm/llm-deepseek/src](../deepseek-harness/packages/llm/llm-deepseek/src) | DeepSeek 适配器实现（对照理解契约） | R2 |
+| 5 | [packages/llm/llm-retry/src](../deepseek-harness/packages/llm/llm-retry/src) | 重试策略插件（挂在请求上的守卫） | R2/R3 |
+| 6 | [packages/typert/protocol/src/types.ts](../deepseek-harness/packages/typert/protocol/src/types.ts) | `TypertLookupMap` / `TypertContextMap` / `TypertCodec` | R4 |
+| 7 | [packages/api/gateway/src/types.ts](../deepseek-harness/packages/api/gateway/src/types.ts) | Host 网关类型 | R4 |
 
 ### 2.2 关键实现片段
 
-**片段 A：内容块词汇表**（[llm/src/types.ts](../../deepseek-harness/packages/llm/llm/src/types.ts)）
+**片段 A：内容块词汇表**（[llm/src/types.ts](../deepseek-harness/packages/llm/llm/src/types.ts)）
 
 ```ts
 interface ContentBlockMap {
@@ -167,7 +167,7 @@ interface ContentBlockMap {
 
 翻译：会话里的"一句话"由**内容块数组**组成，块按 type 分五种：文本、思考（与可见文本区分）、图像、工具调用、工具结果。这是合并可扩展的映射——新模态（如音频）通过声明合并加入（R1），但官方注释明确：*"New core blocks must land with adapter, UI, and compaction support"*——新块不是"加个类型"这么简单（决策 D1）。
 
-**片段 B：一条消息的完整定义**（[llm/src/types.ts](../../deepseek-harness/packages/llm/llm/src/types.ts)）
+**片段 B：一条消息的完整定义**（[llm/src/types.ts](../deepseek-harness/packages/llm/llm/src/types.ts)）
 
 ```ts
 interface Message {
@@ -180,7 +180,7 @@ interface Message {
 
 翻译：`Message` 只有四个字段，但每一处都有讲究。`id` 跨所有表示边界保持稳定（投递、日志、请求里是同一个 id）；`role` 是提供商中立的三种角色；`content` 是精确的模型可见块；`source` 记录"这条消息从哪来"（用户/插件/模型/工具），本身也是合并可扩展的（`MessageSourceMap`）。官方称其为 *"One immutable message representation shared by delivery, durable history, and model requests"*——这就是 R1 的代码形态。
 
-**片段 C：模型身份与重放数据**（[llm/src/types.ts](../../deepseek-harness/packages/llm/llm/src/types.ts)）
+**片段 C：模型身份与重放数据**（[llm/src/types.ts](../deepseek-harness/packages/llm/llm/src/types.ts)）
 
 ```ts
 interface AssistantProvenance {
@@ -194,13 +194,13 @@ interface AssistantProvenance {
 
 ### 2.3 符号 hover 指引
 
-在 VS Code 打开 [packages/llm/llm/src/types.ts](../../deepseek-harness/packages/llm/llm/src/types.ts)，hover `Message`、`ContentBlockMap`、`AssistantProvenance` 查看官方 JSDoc；打开 [packages/typert/protocol/src/types.ts](../../deepseek-harness/packages/typert/protocol/src/types.ts) hover `TypertCodec` 查看两种编解码模式（strict / src-json）的语义。
+在 VS Code 打开 [packages/llm/llm/src/types.ts](../deepseek-harness/packages/llm/llm/src/types.ts)，hover `Message`、`ContentBlockMap`、`AssistantProvenance` 查看官方 JSDoc；打开 [packages/typert/protocol/src/types.ts](../deepseek-harness/packages/typert/protocol/src/types.ts) hover `TypertCodec` 查看两种编解码模式（strict / src-json）的语义。
 
 ## 3 产物演示（EXAMPLE）
 
 ### 3.1 输入
 
-模型的适配器组合配置（[examples/headless-agent/cordis.yml 第 23~32 行](../../deepseek-harness/examples/headless-agent/cordis.yml)）：
+模型的适配器组合配置（[examples/headless-agent/cordis.yml 第 23~32 行](../deepseek-harness/examples/headless-agent/cordis.yml)）：
 
 ```yaml
 - id: llm-deepseek
@@ -265,11 +265,11 @@ interface AssistantProvenance {
 Select-String -Path "examples\acp-agent\tests\snapshots\bash-tool-turn\session.jsonl" -Pattern '"type":"request/header"'
 ```
 
-**预期**：命中一行，含 `"provider":"deepseek-official"` 与 `"model":"deepseek-v4-flash"`。**判据**：把该行与 [examples/headless-agent/cordis.yml 第 23~32 行](../../deepseek-harness/examples/headless-agent/cordis.yml) 对照——模型 id 出现在配置的 `models` 列表里。
+**预期**：命中一行，含 `"provider":"deepseek-official"` 与 `"model":"deepseek-v4-flash"`。**判据**：把该行与 [examples/headless-agent/cordis.yml 第 23~32 行](../deepseek-harness/examples/headless-agent/cordis.yml) 对照——模型 id 出现在配置的 `models` 列表里。
 
 ### 任务 2：读适配器契约
 
-打开 [packages/llm/llm/src/index.ts](../../deepseek-harness/packages/llm/llm/src/index.ts)，找到 `LlmAdapter` 接口，数一数它声明了哪些能力（如 generate/stream、模型解析、能力声明）。然后打开 [packages/llm/llm-deepseek/src](../../deepseek-harness/packages/llm/llm-deepseek/src) 对照实现。
+打开 [packages/llm/llm/src/index.ts](../deepseek-harness/packages/llm/llm/src/index.ts)，找到 `LlmAdapter` 接口，数一数它声明了哪些能力（如 generate/stream、模型解析、能力声明）。然后打开 [packages/llm/llm-deepseek/src](../deepseek-harness/packages/llm/llm-deepseek/src) 对照实现。
 
 ### 任务 3（进阶）：看 typert 的生成产物
 
@@ -277,7 +277,7 @@ Select-String -Path "examples\acp-agent\tests\snapshots\bash-tool-turn\session.j
 Get-ChildItem "packages\typert" -Directory | Select-Object Name
 ```
 
-**预期**：看到 generator / loader / protocol / registry 四个包。**判据**：打开 [docs/subsystems/typert.md](../../deepseek-harness/docs/subsystems/typert.md) 第 5 行确认——"Types shared by generated Remote artifacts, the Host Gateway, and consumer API assemblies"，生成器是契约的唯一来源。
+**预期**：看到 generator / loader / protocol / registry 四个包。**判据**：打开 [docs/subsystems/typert.md](../deepseek-harness/docs/subsystems/typert.md) 第 5 行确认——"Types shared by generated Remote artifacts, the Host Gateway, and consumer API assemblies"，生成器是契约的唯一来源。
 
 ## 5 FAQ 与自测（❓）
 
@@ -312,14 +312,14 @@ Get-ChildItem "packages\typert" -Directory | Select-Object Name
 
 **官方（权威来源）**：
 
-- [docs/subsystems/llm-streaming.md](../../deepseek-harness/docs/subsystems/llm-streaming.md) —— 消息词汇、流协议、适配器契约全文（888 行）
-- [docs/subsystems/typert.md](../../deepseek-harness/docs/subsystems/typert.md) —— typert 公开契约（lookup/context 声明、codec）
-- [packages/llm/README.md](../../deepseek-harness/packages/llm/README.md) —— llm 组包清单与扩展点
-- [packages/typert/README.md](../../deepseek-harness/packages/typert/README.md) —— typert 组包清单
+- [docs/subsystems/llm-streaming.md](../deepseek-harness/docs/subsystems/llm-streaming.md) —— 消息词汇、流协议、适配器契约全文（888 行）
+- [docs/subsystems/typert.md](../deepseek-harness/docs/subsystems/typert.md) —— typert 公开契约（lookup/context 声明、codec）
+- [packages/llm/README.md](../deepseek-harness/packages/llm/README.md) —— llm 组包清单与扩展点
+- [packages/typert/README.md](../deepseek-harness/packages/typert/README.md) —— typert 组包清单
 
 **决策记录（WHY 的一手来源）**：
 
-- 🔴 [.agents/notes/implemented/architecture/2026-08-02-typert-remote-method-calls.md](../../deepseek-harness/.agents/notes/implemented/architecture/2026-08-02-typert-remote-method-calls.md) —— typert 架构与传输决策
+- 🔴 [.agents/notes/implemented/architecture/2026-08-02-typert-remote-method-calls.md](../deepseek-harness/.agents/notes/implemented/architecture/2026-08-02-typert-remote-method-calls.md) —— typert 架构与传输决策
 
 **外部文献（按难度递增）**：
 

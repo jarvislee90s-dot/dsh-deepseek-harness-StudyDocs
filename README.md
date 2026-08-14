@@ -51,6 +51,27 @@ deepseek-harness-StudyDocs/
 3. **对照源码**：官方 JSDoc 全覆盖（`verify-export-jsdoc` 闸门），VS Code 里 hover 任意导出符号即可看到权威注释；
 4. **动手任务**：每篇第 4 节（动手验证）的命令已实测可运行，照抄即可复现产物。
 
+## 快速开始（重要：链接依赖本地源码）
+
+文档中约 150 处 `../../deepseek-harness/...` 链接**指向 dsh 源码仓库，不是本文档仓库内的文件**。要在本地完整使用（点击直达源码、跑动手任务），请按**推荐布局**把两个仓库克隆为同级目录：
+
+```
+你的目录/
+├── deepseek-harness/            # ① 源码：git clone https://github.com/deepseek-ai/deepseek-harness
+└── deepseek-harness-StudyDocs/  # ② 本文档（已在此布局下编写）
+```
+
+然后：
+
+```bash
+cd deepseek-harness
+pnpm install          # 安装依赖（动手任务需要，Node ^22.19 || >=24）
+```
+
+- **链接为什么这样设计**：这套文档的核心体验是"文档 ↔ 源码 ↔ 官方 JSDoc"三方对照（Ctrl+点击直达、hover 看注释、行号定位）——同级克隆后全部链接即刻生效，无需改任何文件；
+- **只浏览不下代码时**：正文、产物表格、图均完整可读；`../../deepseek-harness/...` 链接在网页上会 404，属预期行为，按上述布局克隆后即可恢复；
+- **动手任务**：涉及 `pnpm dsh`、快照 JSONL 解析的命令需要源码仓库，且部分命令需要 `DEEPSEEK_API_KEY`（无 key 的任务在文中已标注为 keyless 可跑）。
+
 ## 版本与维护
 
 - 本系列基于 **deepseek-harness v0.1.0-rc.5**（developer preview）编写；
